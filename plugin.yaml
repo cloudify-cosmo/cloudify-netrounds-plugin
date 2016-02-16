@@ -1,0 +1,30 @@
+plugins:
+    netrounds:
+        executor: central_deployment_agent
+        source: https://github.com/cloudify-cosmo/cloudify-netrounds-plugin/archive/master.zip
+        package_name: cloudify-netrounds-plugin
+        package_version: '0.1'
+
+node_types:
+    cloudify.netrounds.nodes.test:
+        derived_from: cloudify.nodes.Root
+        properties:
+            tests:
+                default: {}
+            name:
+                default: ""
+            description:
+                default: ""
+            auth:
+                default: {}
+        interfaces:
+            cloudify.interfaces.lifecycle:
+                create:
+                    implementation: netrounds.cloudify_netrounds.tests.create
+                    inputs: {}
+                delete:
+                    implementation: netrounds.cloudify_netrounds.tests.delete
+                    inputs: {}
+            cloudify.interfaces.validation:
+                creation:
+                    implementation: netrounds.cloudify_netrounds.tests.creation_validation

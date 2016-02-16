@@ -1,0 +1,70 @@
+tosca_definitions_version: cloudify_dsl_1_2
+
+imports:
+  - http://www.getcloudify.org/spec/cloudify/3.3/types.yaml
+  - https://raw.githubusercontent.com/cloudify-cosmo/cloudify-netrounds-plugin/master/plugin.yaml
+
+inputs:
+
+  email:
+    type: string
+    description: >
+       email/login
+
+  password:
+    type: string
+    description: >
+       password
+
+  domain:
+    type: string
+    description: >
+       domain
+
+node_types:
+
+  auth_configuration:
+     derived_from: cloudify.nodes.Root
+     properties:
+       auth_config: {}
+
+node_templates:
+
+  auth_configuration:
+     type: auth_configuration
+     properties:
+       auth_config:
+         email:  { get_input: email }
+         password:  { get_input: password }
+         domain:  { get_input: domain }
+
+  netrounds_test:
+    type: cloudify.netrounds.nodes.test
+    properties:
+      name: "Traffic TCP test"
+      description: "A Traffic TCP test."
+      tests:
+        - id: None
+          type: "ScriptTest"
+          name: "Step 1"
+          script_name: Simple CIR validation test
+          script_package: Ethernet service activation
+          max_wait_time: 0
+          inputvalues:
+            sender:
+              interface_name: "eth1"
+              genalyzer: "probe1"
+            receiver:
+              interface_name: "eth1"
+              genalyzer: "probe2"
+            duration: 20
+            cir: 10
+            thr_loss: 1
+            thr_delay: 100
+            thr_jitter: 100
+            size_green: 512
+            src_port_green: 5000
+            dst_port_green: 5000
+            dscp_green: 0
+            pbits_green: 0
+      auth: { get_property: [auth_configuration, auth_config] }
